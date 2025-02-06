@@ -5,8 +5,10 @@ function preload() {
 }
 
 let mCanvas;
+let mCaption = "";
 function setup() {
   mCanvas = createCanvas(windowWidth, windowHeight);
+  mCaption = "";
   textSize(20);
 }
 
@@ -22,7 +24,6 @@ function playSound() {
   mSound.play();
 }
 
-let mCaption = "";
 async function captionBlob(blob) {
   let captionRes = await predict("/predict", { img: blob });
   mCaption = captionRes.data[0];
