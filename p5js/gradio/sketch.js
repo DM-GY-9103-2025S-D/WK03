@@ -1,7 +1,10 @@
 let mCamera;
-function preload() {
+let mClient;
+
+async function preload() {
   mCamera = createCapture(VIDEO, { flipped: true });
   mCamera.hide();
+  mClient = await Client.connect("IDMNYU/9103D-2025S-api-example");
 }
 
 let mCanvas;
@@ -25,14 +28,14 @@ function playSound() {
 }
 
 async function captionBlob(blob) {
-  let captionRes = await predict("/predict", { img: blob });
+  let captionRes = await mClient.predict("/predict", { img: blob });
   mCaption = captionRes.data[0];
 
-  let generateRes = await predict("/predict_1", { txt: mCaption });
+  let generateRes = await mClient.predict("/predict_1", { txt: mCaption });
   let mGenerate = generateRes.data[0];
   print(mGenerate);
 
-  let audioRes = await predict("/predict_2", { txt: mGenerate });
+  let audioRes = await mClient.predict("/predict_2", { txt: mGenerate });
   let audioUrl = audioRes.data[0].url;
 
   mSound = loadSound(audioUrl, playSound);

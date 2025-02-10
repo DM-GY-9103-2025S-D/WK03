@@ -1,7 +1,12 @@
-import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+let Client;
 
-const client = await Client.connect("IDMNYU/9103D-2025S-api-example");
+async function loadModule() {
+  try {
+    const module = await import("https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js");
+    Client = module.Client;
+  } catch (error) {
+    console.error("Failed to load module:", error);
+  }
+}
 
-Object.defineProperty(window, "predict", {
-  get() { return client.predict; },
-});
+loadModule();

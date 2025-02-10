@@ -1,7 +1,11 @@
 let mCamera;
-function preload() {
+let mPipeline;
+
+async function preload() {
   mCamera = createCapture(VIDEO, { flipped: true });
   mCamera.hide();
+
+  mPipeline = await pipeline("image-to-text", "Xenova/vit-gpt2-image-captioning");
 }
 
 let mCanvas;
@@ -9,7 +13,7 @@ let mCaption;
 
 function setup() {
   mCanvas = createCanvas(windowWidth, windowHeight);
-  caption = "";
+  mCaption = "";
 }
 
 let modelReady;
@@ -17,7 +21,7 @@ let modelReady;
 function draw() {
   background(220);
 
-  modelReady = typeof captioner !== "undefined";
+  modelReady = typeof mPipeline !== "undefined";
 
   if (!modelReady) {
     text("Loading !", 20, 40);
@@ -32,7 +36,7 @@ async function keyPressed() {
 
   if (key === " ") {
     let canvasUrl = mCanvas.elt.toDataURL();
-    let captions = await captioner(canvasUrl);
+    let captions = await mPipeline(canvasUrl);
     mCaption = captions[0].generated_text;
   }
 }

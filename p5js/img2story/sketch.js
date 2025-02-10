@@ -1,7 +1,16 @@
 let mCamera;
-function preload() {
+
+let sentimentPipeline;
+let captionPipeline;
+let generatorPipeline;
+
+async function preload() {
   mCamera = createCapture(VIDEO, { flipped: true });
   mCamera.hide();
+
+  sentimentPipeline = await pipeline("sentiment-analysis", "thiagohersan/roberta-base-go_emotions");
+  captionPipeline = await pipeline("image-to-text", "Xenova/vit-gpt2-image-captioning");
+  generatorPipeline = await pipeline("text-generation", "Xenova/llama2.c-stories110M");
 }
 
 let mCanvas;
@@ -17,9 +26,9 @@ function draw() {
   background(220);
 
   modelsReady =
-    typeof analyzer !== "undefined" &&
-    typeof captioner !== "undefined" &&
-    typeof generator !== "undefined";
+    typeof sentimentPipeline !== "undefined" &&
+    typeof captionPipeline !== "undefined" &&
+    typeof generatorPipeline !== "undefined";
 
   if (!modelsReady) {
     text("Loading !", 20, 40);
@@ -36,13 +45,13 @@ async function keyPressed() {
 
   if (key === " ") {
     let canvasUrl = mCanvas.elt.toDataURL();
-    let captions = await captioner(canvasUrl);
+    let captions = await captionPipeline(canvasUrl);
     results["caption"] = captions[0].generated_text;
 
-    let texts = await generator(results["caption"], { max_new_tokens: 128 });
+    let texts = await generatorPipeline(results["caption"], { max_new_tokens: 128 });
     results["story"] = texts[0].generated_text;
 
-    let sentiments = await analyzer(results["story"]);
+    let sentiments = await sentimentPipeline(results["story"]);
     results["sentiment"] = sentiments[0].label;
   }
 }
